@@ -192,6 +192,16 @@
                 </div>
                 <button class="btn secondary" id="btnAddImp">混入物を追加</button>
               </div>
+              <div class="actions" style="margin-top:10px;">
+                <button class="btn secondary" id="btnCopyPrevImp">前行の混入物をコピー</button>
+                <button class="btn secondary" id="btnClearImp">混入物を全消去</button>
+              </div>
+              <div class="badges" style="margin-top:8px;">
+                <span class="badge" id="quickImpWhite">白色粘土</span>
+                <span class="badge" id="quickImpBurn">焼土</span>
+                <span class="badge" id="quickImpLoam">ローム</span>
+                <span class="badge" id="quickImpCarbon">炭化物</span>
+              </div>
               <div id="impList"></div>
               <div class="small" style="margin-top:10px;">
                 ※最小mmと最大mmは大小が逆でも入力できます（自動で並べ替え）。<br>
@@ -238,6 +248,9 @@
             <div class="previewBox" style="margin-top:10px;">
               <div class="small">全体記載文</div>
               <div class="previewText" id="p_fullDesc">まだ全体記載文は生成されていません。</div>
+            </div>
+            <div class="actions" style="margin-top:10px;">
+              <button class="btn secondary" id="btnCopyDesc">全体記載文をコピー</button>
             </div>
 
             <div class="small" style="margin-top:10px;">
@@ -327,6 +340,57 @@
             <button class="btn secondary" id="m_master_reset">追加分を消す</button>
           </div>
         </div>
+
+        <div class="cardBd" style="border-bottom:1px solid var(--line);">
+          <div style="font-weight:900; margin-bottom:8px;">追加済みマスタの削除</div>
+          <div class="small" style="margin-bottom:10px;">
+            この端末で追加した候補だけを削除できます。元から入っている候補は消えません。
+          </div>
+
+          <div class="formGrid" style="grid-template-columns: repeat(2, 1fr);">
+            <div>
+              <label>混入物 種類（削除）</label>
+              <select id="m_del_impurityType"></select>
+            </div>
+            <div style="align-self:end;">
+              <button class="btn secondary" id="m_del_impurityType_btn" style="width:100%;">削除</button>
+            </div>
+
+            <div>
+              <label>mm候補（削除）</label>
+              <select id="m_del_mmRange"></select>
+            </div>
+            <div style="align-self:end;">
+              <button class="btn secondary" id="m_del_mmRange_btn" style="width:100%;">削除</button>
+            </div>
+
+            <div>
+              <label>土種（削除）</label>
+              <select id="m_del_doshu"></select>
+            </div>
+            <div style="align-self:end;">
+              <button class="btn secondary" id="m_del_doshu_btn" style="width:100%;">削除</button>
+            </div>
+
+            <div>
+              <label>遺構コード（削除）</label>
+              <select id="m_del_isigou"></select>
+            </div>
+            <div style="align-self:end;">
+              <button class="btn secondary" id="m_del_isigou_btn" style="width:100%;">削除</button>
+            </div>
+
+            <div>
+              <label>含み方（削除）</label>
+              <select id="m_del_impurityWay"></select>
+            </div>
+            <div style="align-self:end;">
+              <button class="btn secondary" id="m_del_impurityWay_btn" style="width:100%;">削除</button>
+            </div>
+          </div>
+
+          <div class="small" id="m_delete_status" style="margin-top:10px;">削除待機中</div>
+        </div>
 <div class="cardBd" id="masterView"></div>
       </div>
     </div>
@@ -351,6 +415,7 @@
     mmRange: ["1","3","5","10","15","20","25","30","50","100","300"],
     impurityType: ["白色粘土","白色粘土ブロック","焼土","黒色土","ローム","炭化物"],
     impurityAmount: ["微量","少量","中量","多量","極多量"],
+    impurityWay: ["斑状に","底面に"],
   };
 
   const colorNameMap = {"7.5R7/1":"明赤灰色土","7.5R6/1":"赤灰色土","7.5R5/1":"赤灰色土","7.5R4/1":"暗赤杯色土","7.5R3/1":"暗赤杯色土","7.5R2/1":"赤黒色土","7.5R1.7/1":"赤黒色土","7.5R6/2":"灰赤色土","7.5R5/2":"灰赤色土","7.5R4/2":"灰赤色土","7.5R3/2":"暗赤褐色土","7.5R2/2":"極暗赤褐色土","7.5R5/3":"にぶい赤褐色土","7.5R4/3":"にぶい赤褐色土","7.5R3/3":"暗赤褐色土","7.5R2/3":"極暗赤褐色土","7.5R4/4":"にぶい赤色土","7.5R3/4":"暗赤色土","7.5R4/6":"赤色土","7.5R3/6":"暗赤色土","7.5R4/8":"赤色土","10R7/1":"明赤灰色土","10R6/1":"赤灰色土","10R5/1":"赤灰色土","10R4/1":"暗赤灰色土","10R3/1":"暗赤灰色土","10R2/1":"赤黒色土","10R1.7/1":"赤黒色土","10R6/2":"灰赤色土","10R5/2":"灰赤色土","10R4/2":"灰赤色土","10R3/2":"暗赤褐色土","10R2/2":"極暗赤褐色土","10R6/3":"にぶい赤褐色土","10R5/3":"赤褐色土","10R4/3":"赤褐色土","10R3/3":"暗赤褐色土","10R2/3":"極暗赤褐色土","10R6/4":"にぶい赤褐色土","10R5/4":"赤褐色土","10R4/4":"赤褐色土","10R3/4":"暗赤色土","10R6/6":"赤橙色土","10R5/6":"赤色土","10R4/6":"赤色土","10R3/6":"暗赤色土","10R6/8":"赤橙色土","10R5/8":"赤色土","10R4/8":"赤色土","2.5YR7/1":"明赤灰色土","2.5YR6/1":"赤灰色土","2.5YR5/1":"赤灰色土","2.5YR4/1":"赤灰色土","2.5YR3/1":"暗赤灰色土","2.5YR2/1":"赤黒色土","2.5YR1.7/1":"赤黒色土","2.5YR7/2":"明赤灰色土","2.5YR6/2":"灰赤色土","2.5YR5/2":"灰赤色土","2.5YR4/2":"灰赤色土","2.5YR3/2":"暗赤褐色土","2.5YR2/2":"極暗赤褐色土","2.5YR7/3":"淡赤橙色土","2.5YR6/3":"にぶい橙色土","2.5YR5/3":"にぶい赤褐色土","2.5YR4/3":"にぶい赤褐色土","2.5YR3/3":"暗赤褐色土","2.5YR2/3":"極暗赤褐色土","2.5YR7/4":"淡赤橙色土","2.5YR6/4":"にぶい橙色土","2.5YR5/4":"にぶい赤褐色土","2.5YR4/4":"にぶい赤褐色土","2.5YR3/4":"暗赤褐色土","2.5YR2/4":"極暗赤褐色土","2.5YR7/6":"橙色土","2.5YR6/6":"橙色土","2.5YR5/6":"明赤褐色土","2.5YR4/6":"赤褐色土","2.5YR3/6":"暗赤褐色土","2.5YR7/8":"橙色土","2.5YR6/8":"橙色土","2.5YR5/8":"明赤褐色土","2.5YR4/8":"赤褐色土","5YR8/1":"灰白色土","5YR7/1":"明褐灰色土","5YR6/1":"褐灰色土","5YR5/1":"褐灰色土","5YR4/1":"褐灰色土","5YR3/1":"黒褐色土","5YR2/1":"黒褐色土","5YR1.7/1":"黒色土","5YR8/2":"灰白色土","5YR7/2":"明褐灰色土","5YR6/2":"灰褐色土","5YR5/2":"灰褐色土","5YR4/2":"灰褐色土","5YR3/2":"暗赤褐色土","5YR2/2":"黒褐色土","5YR8/3":"淡橙色土","5YR7/3":"にぶい橙色土","5YR6/3":"にぶい橙色土","5YR5/3":"にぶい赤褐色土","5YR4/3":"にぶい赤褐色土","5YR3/3":"暗赤褐色土","5YR2/3":"極暗赤褐色土","5YR8/4":"淡橙色土","5YR7/4":"にぶい橙色土","5YR6/4":"にぶい橙色土","5YR5/4":"にぶい赤褐色土","5YR4/4":"にぶい赤褐色土","5YR3/4":"暗赤褐色土","5YR2/4":"極暗赤褐色土","5YR7/6":"橙色土","5YR6/6":"橙色土","5YR5/6":"明赤褐色土","5YR4/6":"赤褐色土","5YR3/6":"暗赤褐色土","5YR7/8":"橙色土","5YR6/8":"橙色土","5YR5/8":"明赤褐色土","5YR4/8":"赤褐色土","7.5YR8/1":"灰白色土","7.5YR7/1":"明褐灰色土","7.5YR6/1":"褐灰色土","7.5YR5/1":"褐灰色土","7.5YR4/1":"褐灰色土","7.5YR3/1":"黒褐色土","7.5YR2/1":"黒色土","7.5YR1.7/1":"黒色土","7.5YR8/2":"灰白色土","7.5YR7/2":"明褐灰色土","7.5YR6/2":"灰褐色土","7.5YR5/2":"灰褐色土","7.5YR4/2":"灰褐色土","7.5YR3/2":"黒褐色土","7.5YR2/2":"黒褐色土","7.5YR8/3":"浅黄橙色土","7.5YR7/3":"にぶい橙色土","7.5YR6/3":"にぶい褐色土","7.5YR5/3":"にぶい褐色土","7.5YR4/3":"褐色土","7.5YR3/3":"暗褐色土","7.5YR2/3":"極暗褐色土","7.5YR8/4":"浅黄橙色土","7.5YR7/4":"にぶい橙色土","7.5YR6/4":"にぶい橙色土","7.5YR5/4":"にぶい褐色土","7.5YR4/4":"褐色土","7.5YR3/4":"暗褐色土","7.5YR8/6":"浅黄橙色土","7.5YR7/6":"橙色土","7.5YR6/6":"橙色土","7.5YR5/6":"明褐色土","7.5YR4/6":"褐色土","7.5YR8/8":"黄橙色土","7.5YR7/8":"黄橙色土","7.5YR6/8":"橙色土","7.5YR5/8":"明褐色土","10YR8/1":"灰白色土","10YR7/1":"灰白色土","10YR6/1":"褐灰色土","10YR5/1":"褐灰色土","10YR4/1":"褐灰色土","10YR3/1":"黒褐色土","10YR2/1":"黒色土","10YR1.7/1":"黒色土","10YR8/2":"灰白色土","10YR7/2":"にぶい黄橙色土","10YR6/2":"灰黄褐色土","10YR5/2":"灰黄褐色土","10YR4/2":"灰黄褐色土","10YR3/2":"黒褐色土","10YR2/2":"黒褐色土","10YR8/3":"浅黄橙色土","10YR7/3":"にぶい黄橙色土","10YR6/3":"にぶい黄橙色土","10YR5/3":"にぶい黄褐色土","10YR4/3":"にぶい黄褐色土","10YR3/3":"暗褐色土","10YR2/3":"黒褐色土","10YR8/4":"浅黄橙色土","10YR7/4":"にぶい黄橙色土","10YR6/4":"にぶい黄橙色土","10YR5/4":"にぶい黄褐色土","10YR4/4":"褐色土","10YR3/4":"暗褐色土","10YR8/6":"黄橙色土","10YR7/6":"明黄褐色土","10YR6/6":"明黄褐色土","10YR5/6":"黄褐色土","10YR4/6":"褐色土","10YR8/8":"黄橙色土","10YR7/8":"黄橙色土","10YR6/8":"明黄褐色土","10YR5/8":"黄褐色土","2.5Y8/1":"灰白色土","2.5Y7/1":"灰白色土","2.5Y6/1":"黄灰色土","2.5Y5/1":"黄灰色土","2.5Y4/1":"黄灰色土","2.5Y3/1":"黒褐色土","2.5Y2/1":"黒色土","2.5Y8/2":"灰白色土","2.5Y7/2":"灰黄色土","2.5Y6/2":"灰黄色土","2.5Y5/2":"暗灰黄色土","2.5Y4/2":"暗灰黄色土","2.5Y3/2":"黒褐色土","2.5Y8/3":"淡黄色土","2.5Y7/3":"浅黄色土","2.5Y6/3":"にぶい黄色土","2.5Y5/3":"黄褐色土","2.5Y4/3":"オリーブ褐色土","2.5Y3/3":"暗オリーブ褐色土","2.5Y8/4":"淡黄色土","2.5Y7/4":"浅黄色土","2.5Y6/4":"にぶい黄色土","2.5Y5/4":"黄褐色土","2.5Y4/4":"オリーブ褐色土","2.5Y8/6":"黄色土","2.5Y7/6":"明黄褐色土","2.5Y6/6":"明黄褐色土","2.5Y5/6":"黄褐色土","2.5Y4/6":"オリーブ褐色土","2.5Y8/8":"黄色土","2.5Y7/8":"黄色土","2.5Y6/8":"明黄褐色土","5Y8/1":"灰白色土","5Y7/1":"灰白色土","5Y6/1":"灰色土","5Y5/1":"灰色土","5Y4/1":"灰色土","5Y3/1":"オリーブ黒色土","5Y2/1":"黒色土","5Y8/2":"灰白色土","5Y7/2":"灰白色土","5Y6/2":"灰オリーブ色土","5Y5/2":"灰オリーブ色土","5Y4/2":"灰オリーブ色土","5Y3/2":"オリーブ黒色土","5Y2/2":"オリーブ黒色土","5Y8/3":"淡黄色土","5Y7/3":"浅黄色土","5Y6/3":"オリーブ黄色土","5Y5/3":"灰オリーブ色土","5Y4/3":"暗オリーブ色土","5Y8/4":"淡黄色土","5Y7/4":"浅黄色土","5Y6/4":"オリーブ黄色土","5Y5/4":"オリーブ色土","5Y4/4":"暗オリーブ色土","5Y8/6":"黄色土","5Y7/6":"黄色土","5Y6/6":"オリーブ色土","5Y5/6":"オリーブ色土","5Y8/8":"黄色土","5Y7/8":"黄色土","5Y6/8":"オリーブ色土","7.5Y8/1":"灰白色土","7.5Y7/1":"灰白色土","7.5Y6/1":"灰色土","7.5Y5/1":"灰色土","7.5Y4/1":"灰色土","7.5Y3/1":"オリーブ黒色土","7.5Y2/1":"黒色土","7.5Y8/2":"灰白色土","7.5Y7/2":"灰白色土","7.5Y6/2":"灰オリーブ色土","7.5Y5/2":"灰オリーブ色土","7.5Y4/2":"灰オリーブ色土","7.5Y3/2":"オリーブ黒色土","7.5Y2/2":"オリーブ黒色土","7.5Y8/3":"淡黄色土","7.5Y7/3":"浅黄色土","7.5Y6/3":"オリーブ黄色土","7.5Y5/3":"灰オリーブ色土","7.5Y4/3":"暗オリーブ色土","10Y8/1":"灰白色土","10Y7/1":"灰白色土","10Y6/1":"灰色土","10Y5/1":"灰色土","10Y4/1":"灰色土","10Y3/1":"オリーブ黒色土","10Y2/1":"黒色土","10Y8/2":"灰白色土","10Y7/2":"灰白色土","10Y6/2":"オリーブ灰色土","10Y5/2":"オリーブ灰色土","10Y4/2":"オリーブ灰色土","10Y3/2":"オリーブ黒色土","N8/0":"灰白色土","N7/0":"灰白色土","N6/0":"灰色土","N5/0":"灰色土","N4/0":"灰色土","N3/0":"暗灰色土","N2/0":"黒色土","N1.5/0":"黒色土","2.5GY8/1":"灰白色土","2.5GY7/1":"明オリーブ灰色土","2.5GY6/1":"オリーブ灰色土","2.5GY5/1":"オリーブ灰色土","2.5GY4/1":"暗オリーブ灰色土","2.5GY3/1":"暗オリーブ灰色土","2.5GY2/1":"黒色土","5GY8/1":"灰白色土","5GY7/1":"明オリーブ灰色土","5GY6/1":"オリーブ灰色土","5GY5/1":"オリーブ灰色土","5GY4/1":"暗オリーブ灰色土","5GY3/1":"暗オリーブ灰色土","5GY2/1":"オリーブ黒色土","7.5GY8/1":"明緑灰色土","7.5GY7/1":"明緑灰色土","7.5GY6/1":"緑灰色土","7.5GY5/1":"緑灰色土","7.5GY4/1":"暗緑灰色土","7.5GY3/1":"暗緑灰色土","7.5GY2/1":"緑黒色土","10GY8/1":"明緑灰色土","10GY7/1":"明緑灰色土","10GY6/1":"緑灰色土","10GY5/1":"緑灰色土","10GY4/1":"暗緑灰色土","10GY3/1":"暗緑灰色土","10GY2/1":"緑黒色土","5G7/1":"明緑灰色土","5G6/1":"緑灰色土","5G5/1":"緑灰色土","5G4/1":"暗緑灰色土","5G3/1":"暗緑灰色土","5G2/1":"緑黒色土","5G1.7/1":"緑黒色土","10G7/1":"明緑灰色土","10G6/1":"緑灰色土","10G5/1":"緑灰色土","10G4/1":"暗緑灰色土","10G3/1":"暗緑灰色土","10G2/1":"緑黒色土","10G1.7/1":"緑黒色土","5BG7/1":"明青灰色土","5BG6/1":"青灰色土","5BG5/1":"青灰色土","5BG4/1":"暗青灰色土","5BG3/1":"暗青灰色土","5BG2/1":"青黒色土","5BG1.7/1":"青黒色土","10BG7/1":"明青灰色土","10BG6/1":"青灰色土","10BG5/1":"青灰色土","10BG4/1":"暗青灰色土","10BG3/1":"暗青灰色土","10BG2/1":"青黒色土","10BG1.7/1":"青黒色土","5B7/1":"明青灰色土","5B6/1":"青灰色土","5B5/1":"青灰色土","5B4/1":"暗青灰色土","5B3/1":"暗青灰色土","5B2/1":"青黒色土","5B1.7/1":"青黒色土","5PB7/1":"明青灰色土","5PB6/1":"青灰色土","5PB5/1":"青灰色土","5PB4/1":"暗青灰色土","5PB3/1":"暗青灰色土","5PB2/1":"青黒色土","5PB1.7/1":"青黒色土","5P7/1":"明紫灰色土","5P6/1":"紫灰色土","5P5/1":"紫灰色土","5P4/1":"暗紫灰色土","5P3/1":"暗紫灰色土","5P2/1":"紫黒色土","5P1.7/1":"紫黒色土","5RP7/1":"明紫灰色土","5RP6/1":"紫灰色土","5RP5/1":"紫灰色土","5RP4/1":"暗紫灰色土","5RP3/1":"暗紫灰色土","5RP2/1":"紫黒色土","5RP1.7/1":"紫黒色土","5R7/1":"明赤灰色土","5R6/1":"赤灰色土","5R5/1":"赤灰色土","5R4/1":"暗赤灰色土","5R3/1":"暗赤灰色土","5R2/1":"赤黒色土","5R1.7/1":"赤黒色土"};
@@ -397,6 +462,7 @@ function applyCustomMaster(){
   if(Array.isArray(c.mmRange)) master.mmRange = sortNumericStrings(uniqMerge(master.mmRange, c.mmRange).map(String));
   if(Array.isArray(c.doshu)) master.doshu = uniqMerge(master.doshu, c.doshu);
   if(Array.isArray(c.isigou)) master.isigou = uniqMerge(master.isigou, c.isigou);
+  if(Array.isArray(c.impurityWay)) master.impurityWay = uniqMerge(master.impurityWay, c.impurityWay);
 }
 
 const STORAGE_KEY = "doso_ledger_rows_v1";
@@ -404,7 +470,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     { id: makeId(), isigou:"SI", isigouNo:"01", spl:"", souban:"1", hue:"10YR", value:"5", choroma:"1",
       colorName:"褐灰色土",
       doshu:"シルト", shimari:"非常に強い", nensei:"やや弱い",
-      impurities:[ {id:makeId(), type:"白色粘土", minMm:"1", maxMm:"10", amount:"極多量"}, {id:makeId(), type:"焼土", minMm:"1", maxMm:"3", amount:"微量"} ],
+      impurities:[ {id:makeId(), type:"白色粘土", minMm:"1", maxMm:"10", amount:"極多量", way:""}, {id:makeId(), type:"焼土", minMm:"1", maxMm:"3", amount:"微量", way:""} ],
       seikaku:"柱痕跡あり", bikou:"試作データ" }
   ];
   let form = blankForm();
@@ -428,7 +494,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     if(!(it.type||it.minMm||it.maxMm||it.amount)) return "";
     const mm=normMmPair(it.minMm,it.maxMm);
     const mmText=(mm.min&&mm.max)?`（φ${mm.min}～${mm.max}mm）`:(mm.min?`（φ${mm.min}mm）`:"");
-    return `${it.type||""}${mmText}を${it.amount||""}`;
+    return `${it.type||""}${mmText}を${it.way ? it.way : ""}${it.amount||""}含む`;
   }
   function impuritiesSentence(list){
     const parts=(list||[]).map(impurityPhrase).filter(Boolean);
@@ -478,7 +544,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     masterView:$("masterView"),
     btnCsv:$("btnCsv"), btnJson:$("btnJson"),
     btnSaveLocal:$("btnSaveLocal"), btnLoadLocal:$("btnLoadLocal"), btnClearLocal:$("btnClearLocal"),
-    btnAddImp:$("btnAddImp"), btnSaveClear:$("btnSaveClear"), btnAddNext:$("btnAddNext"), btnReset:$("btnReset"),
+    btnAddImp:$("btnAddImp"), btnCopyPrevImp:$("btnCopyPrevImp"), btnClearImp:$("btnClearImp"), btnCopyDesc:$("btnCopyDesc"), btnSaveClear:$("btnSaveClear"), btnAddNext:$("btnAddNext"), btnReset:$("btnReset"),
     fabNew:$("fabNew"),
   };
 
@@ -503,6 +569,8 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     }else if(key==="isigou"){
       const up = v.toUpperCase();
       if(!master.isigou.map(String).includes(up)) master.isigou.push(up);
+    } else if(key==="impurityWay"){
+      if(!master.impurityWay.map(String).includes(v)) master.impurityWay.push(v);
     }
 
     const c = loadCustomMaster();
@@ -514,7 +582,8 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     refreshMasterSelects();
     renderAll();
     if(statusEl) statusEl.textContent = `追加しました：${valToStore}`;
-  }
+    refreshDeleteMasterSelects();
+  })
 
   document.addEventListener("click", (ev)=>{
     const t = ev.target;
@@ -537,11 +606,16 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
       const inp = document.getElementById("m_isigou_in");
       addMasterItem("isigou", inp && inp.value);
       if(inp) inp.value = "";
+    } else if(t.id==="m_impurityWay_add"){
+      const inp = document.getElementById("m_impurityWay_in");
+      addMasterItem("impurityWay", inp && inp.value);
+      if(inp) inp.value = "";
     } else if(t.id==="m_master_reset"){
       try{ localStorage.removeItem(MASTER_KEY); }catch(e){}
       location.reload();
     }
   });
+  refreshDeleteMasterSelects();
 
   function fillSelect(sel, items, placeholder){
     sel.innerHTML="";
@@ -583,6 +657,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
     els.p_featureCode.textContent = featureCode(form)||"-";
     els.p_colorCode.textContent = colorCode(form)||"-";
     els.p_colorName.textContent = soilColorName(form)||"土色マスタ未登録";
+    els.p_colorName.style.color = soilColorName(form) ? "" : "#b91c1c";
     els.p_impSentence.textContent = impuritiesSentence(form.impurities||[]) || "まだ混入物は入力されていません。";
     els.p_fullDesc.textContent = buildDesc(form) || "まだ全体記載文は生成されていません。";
   }
@@ -605,11 +680,12 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
               <button class="miniBtn" data-act="del" title="削除">🗑</button>
             </div>
           </div>
-          <div class="impGrid">
+          <div class="impGrid" style="grid-template-columns: repeat(5, 1fr);">
             <div><label>種類</label><select data-field="type">${optionsHtml(master.impurityType, it.type)}</select></div>
             <div><label>最小mm</label><select data-field="minMm">${optionsHtml(master.mmRange, it.minMm, true)}</select></div>
             <div><label>最大mm</label><select data-field="maxMm">${optionsHtml(master.mmRange, it.maxMm, true)}</select></div>
             <div><label>量</label><select data-field="amount">${optionsHtml(master.impurityAmount, it.amount)}</select></div>
+            <div><label>含み方</label><select data-field="way">${optionsHtml(master.impurityWay, it.way, true)}</select></div>
           </div>
           <div class="hint">記載プレビュー: ${phrase}</div>
         </div>
@@ -701,6 +777,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
       ["混入物種類", master.impurityType],
       ["mm候補", master.mmRange],
       ["量", master.impurityAmount],
+                ["含み方", master.impurityWay],
     ];
     els.masterView.innerHTML = blocks.map(([title, arr])=>{
       const pills = arr.map(v=>`<span class="badge">${v}</span>`).join(" ");
@@ -764,7 +841,7 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
   });
 
   els.btnAddImp.addEventListener("click", ()=>{
-    form.impurities = [...(form.impurities||[]), {id:makeId(), type:"", minMm:"", maxMm:"", amount:""}];
+    form.impurities = [...(form.impurities||[]), {id:makeId(), type:"", minMm:"", maxMm:"", amount:"", way:""}];
     renderAll();
   });
 
@@ -814,6 +891,143 @@ const STORAGE_KEY = "doso_ledger_rows_v1";
 
     editingId = null;
     form = next;
+  // ---- 現場入力を速くする補助機能 ----
+  function addQuickImpurity(type){
+    form.impurities = [...(form.impurities||[]), {id:makeId(), type:type, minMm:"", maxMm:"", amount:""}];
+    renderAll();
+  }
+
+  if(document.getElementById("quickImpWhite")){
+    document.getElementById("quickImpWhite").addEventListener("click", ()=>addQuickImpurity("白色粘土"));
+    document.getElementById("quickImpBurn").addEventListener("click", ()=>addQuickImpurity("焼土"));
+    document.getElementById("quickImpLoam").addEventListener("click", ()=>addQuickImpurity("ローム"));
+    document.getElementById("quickImpCarbon").addEventListener("click", ()=>addQuickImpurity("炭化物"));
+  }
+
+  if(els.btnClearImp) els.btnClearImp.addEventListener("click", ()=>{
+    form.impurities = [];
+    renderAll();
+  });
+
+  if(els.btnCopyPrevImp) els.btnCopyPrevImp.addEventListener("click", ()=>{
+    if(!rows.length){
+      alert("まだ保存済みの行がありません。");
+      return;
+    }
+    const prev = rows[0];
+    form.impurities = (prev.impurities||[]).map(it=>({...it, id:makeId()}));
+    renderAll();
+  });
+
+  if(els.btnCopyDesc) els.btnCopyDesc.addEventListener("click", async ()=>{
+    const text = buildDesc(form) || "";
+    if(!text){
+      alert("コピーする記載文がありません。");
+      return;
+    }
+    try{
+      await navigator.clipboard.writeText(text);
+      alert("全体記載文をコピーしました。");
+    }catch(e){
+      alert("コピーに失敗しました。ブラウザが未対応の可能性があります。");
+    }
+  });
+  // ---- 追加済みマスタ削除 ----
+  function fillSelectSimple(sel, items, placeholder){
+    if(!sel) return;
+    sel.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = placeholder || "選択してください";
+    sel.appendChild(opt0);
+    (items||[]).forEach(v=>{
+      const o = document.createElement("option");
+      o.value = v;
+      o.textContent = v;
+      sel.appendChild(o);
+    });
+  }
+
+  function refreshDeleteMasterSelects(){
+    const custom = getCustomMaster();
+    fillSelectSimple(document.getElementById("m_del_impurityType"), custom.impurityType || [], "削除する混入物種類を選択");
+    fillSelectSimple(document.getElementById("m_del_mmRange"), custom.mmRange || [], "削除するmm候補を選択");
+    fillSelectSimple(document.getElementById("m_del_doshu"), custom.doshu || [], "削除する土種を選択");
+    fillSelectSimple(document.getElementById("m_del_isigou"), custom.isigou || [], "削除する遺構コードを選択");
+    fillSelectSimple(document.getElementById("m_del_impurityWay"), custom.impurityWay || [], "削除する含み方を選択");
+  }
+
+  function removeFromCustomMaster(key, value){
+    const v = String(value ?? "").trim();
+    if(!v) return false;
+    const custom = getCustomMaster();
+    const before = Array.isArray(custom[key]) ? custom[key] : [];
+    const after = before.filter(x => String(x) !== v);
+    if(before.length === after.length) return false;
+    custom[key] = after;
+    saveCustomMaster(custom);
+
+    // 画面上のmasterからも削除（元マスタは消さない）
+    if(key === "impurityType"){
+      const baseSet = new Set(["白色粘土","白色粘土ブロック","焼土","黒色土","ローム","炭化物"].map(String));
+      master.impurityType = master.impurityType.filter(x => String(x) !== v || baseSet.has(String(x)));
+    }else if(key === "mmRange"){
+      const baseSet = new Set(["1","3","5","10","15","20","25","30","50","100","300"].map(String));
+      master.mmRange = master.mmRange.filter(x => String(x) !== v || baseSet.has(String(x)));
+    }else if(key === "doshu"){
+      const baseSet = new Set(["土","粘土","ローム","シルト","粘土質シルト","砂質シルト","砂","細粒砂","中粒砂","粗粒砂"].map(String));
+      master.doshu = master.doshu.filter(x => String(x) !== v || baseSet.has(String(x)));
+    }else if(key === "isigou"){
+      const baseSet = new Set(["SA","SB","SC","SD","SE","SF","SG","SH","SI","SJ","SK","SL","SM","SN","SO","SP","SS","ST","SU","SW","SX","SY","SZ","NR"].map(String));
+      master.isigou = master.isigou.filter(x => String(x) !== v || baseSet.has(String(x)));
+    } else if(key === "impurityWay"){
+      const baseSet = new Set(["斑状に","底面に"].map(String));
+      master.impurityWay = master.impurityWay.filter(x => String(x) !== v || baseSet.has(String(x)));
+    }
+
+    refreshMasterSelects();
+    refreshDeleteMasterSelects();
+    renderAll();
+    const st = document.getElementById("m_delete_status");
+    if(st) st.textContent = `削除しました：${v}`;
+    return true;
+  }
+
+  document.addEventListener("click", (ev)=>{
+    const t = ev.target;
+    if(!t || !t.id) return;
+
+    if(t.id === "m_del_impurityType_btn"){
+      const sel = document.getElementById("m_del_impurityType");
+      if(!removeFromCustomMaster("impurityType", sel && sel.value)){
+        alert("削除する追加済み混入物種類を選択してください。");
+      }
+    } else if(t.id === "m_del_mmRange_btn"){
+      const sel = document.getElementById("m_del_mmRange");
+      if(!removeFromCustomMaster("mmRange", sel && sel.value)){
+        alert("削除する追加済みmm候補を選択してください。");
+      }
+    } else if(t.id === "m_del_doshu_btn"){
+      const sel = document.getElementById("m_del_doshu");
+      if(!removeFromCustomMaster("doshu", sel && sel.value)){
+        alert("削除する追加済み土種を選択してください。");
+      }
+    } else if(t.id === "m_del_isigou_btn"){
+      const sel = document.getElementById("m_del_isigou");
+      if(!removeFromCustomMaster("isigou", sel && sel.value)){
+        alert("削除する追加済み遺構コードを選択してください。");
+      }
+    } else if(t.id === "m_del_impurityWay_btn"){
+      const sel = document.getElementById("m_del_impurityWay");
+      if(!removeFromCustomMaster("impurityWay", sel && sel.value)){
+        alert("削除する追加済み含み方を選択してください。");
+      }
+    }
+  });
+
+
+
+
     syncFormToUI();
     renderAll();
   });
