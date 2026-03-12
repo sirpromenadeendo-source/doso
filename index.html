@@ -294,7 +294,7 @@
   const master = {
     isigou: ["SA","SB","SC","SD","SE","SF","SG","SH","SI","SJ","SK","SL","SM","SN","SO","SP","SS","ST","SU","SW","SX","SY","SZ","NR"],
     isigouNo: Array.from({length:99}, (_,i)=>String(i+1).padStart(2,"0")),
-    souban: ["1","2","3","4","5","Ⅱc","Ⅱd","Ⅲ","Ⅳ","Ⅴ","Ⅵ","Ⅶ"],
+    souban: ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100"],
     hue: ["7.5R","10R","2.5YR","5YR","7.5YR","10YR","2.5Y","5Y","7.5Y","10Y","N","2.5GY","5GY","7.5GY","10GY","5G","10G","5BG","10BG","5B","5PB","5P","5RP","5R"],
     value: ["1.5","1.7","2","3","4","5","6","7","8"],
     choroma: ["0","1","2","3","4","5","6","7","8"],
@@ -312,6 +312,7 @@
   const STORAGE_KEY = "doso_ledger_rows_v1";
   let rows = [
     { id: makeId(), isigou:"SI", isigouNo:"01", spl:"", souban:"1", hue:"10YR", value:"5", choroma:"1",
+      colorName:"褐灰色土",
       doshu:"シルト", shimari:"非常に強い", nensei:"やや弱い",
       impurities:[ {id:makeId(), type:"白色粘土", minMm:"1", maxMm:"10", amount:"極多量"}, {id:makeId(), type:"焼土", minMm:"1", maxMm:"3", amount:"微量"} ],
       seikaku:"柱痕跡あり", bikou:"試作データ" }
@@ -321,7 +322,7 @@
 
   function makeId(){ return `${Date.now()}-${Math.random().toString(36).slice(2,8)}`; }
   function blankForm(){
-    return { id: makeId(), isigou:"", isigouNo:"", spl:"", souban:"", hue:"", value:"", choroma:"", doshu:"", shimari:"", nensei:"", impurities:[], seikaku:"", bikou:"" };
+    return { id: makeId(), isigou:"", isigouNo:"", spl:"", souban:"", hue:"", value:"", choroma:"", colorName:"", doshu:"", shimari:"", nensei:"", impurities:[], seikaku:"", bikou:"" };
   }
   function featureCode(f){ return `${f.isigou||""}${f.isigouNo||""}`; }
   function colorCode(f){ if(!f.hue||!f.value||!f.choroma) return ""; return `${f.hue}${f.value}/${f.choroma}`; }
@@ -354,10 +355,10 @@
   }
   function escCsv(val){ const s=String(val??""); return `"${s.replaceAll('"','""')}"`; }
   function rowsToCsv(rs){
-    const headers=["遺構コード","遺構","番号","SPL","層番","色調","コード","Hue","Value","Choroma","土種","締り","粘性","混入物記載","全体記載","性格","備考"];
+    const headers=["遺構コード","遺構","番号","SPL","層番","色調","土色(保存)","コード","Hue","Value","Choroma","土種","締り","粘性","混入物記載","全体記載","性格","備考"];
     const lines=[headers.join(",")];
     rs.forEach(r=>{
-      const vals=[ featureCode(r), r.isigou, r.isigouNo, r.spl, r.souban, soilColorName(r), colorCode(r), r.hue, r.value, r.choroma, r.doshu, r.shimari, r.nensei, impuritiesSentence(r.impurities||[]), buildDesc(r), r.seikaku, r.bikou ].map(escCsv);
+      const vals=[ featureCode(r), r.isigou, r.isigouNo, r.spl, r.souban, soilColorName(r), (r.colorName||soilColorName(r)), colorCode(r), r.hue, r.value, r.choroma, r.doshu, r.shimari, r.nensei, impuritiesSentence(r.impurities||[]), buildDesc(r), r.seikaku, r.bikou ].map(escCsv);
       lines.push(vals.join(","));
     });
     return lines.join("\n");
@@ -551,7 +552,10 @@
   }
 
   function renderAll(){
-    els.f_colorName.value = soilColorName(form);
+    const cn = soilColorName(form);
+    els.f_colorName.value = cn;
+    form.colorName = cn;
+    form.colorName = soilColorName(form);
     renderBadges(); renderPreview(); renderImpurities(); renderList(); renderMaster(); renderEditMode();
   }
 
@@ -568,6 +572,7 @@
     form.nensei = els.f_nensei.value;
     form.seikaku = els.f_seikaku.value;
     form.bikou = els.f_bikou.value;
+    form.colorName = soilColorName(form);
   }
   function syncFormToUI(){
     els.f_isigou.value = form.isigou||"";
