@@ -662,8 +662,8 @@
 
   els.btnCsv.addEventListener("click", ()=>{
     const csv = rowsToCsv(rows);
-    // Excel(特にWindows日本語環境)で文字化けしにくいようにUTF-8 BOMを付与
-    download("doso-ledger-data.csv", "\ufeff" + csv, "text/csv;charset=utf-8");
+    const bom = "﻿";
+    download("doso-ledger-data.csv", bom + csv, "text/csv;charset=utf-8");
   });
   els.btnJson.addEventListener("click", ()=>download("doso-ledger-data.json", JSON.stringify(rows,null,2), "application/json;charset=utf-8"));
 
