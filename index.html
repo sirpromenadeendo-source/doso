@@ -205,8 +205,8 @@
             </div>
 
             <div class="actions">
-              <button class="btn" id="btnSave">追加する</button>
-              <button class="btn secondary" id="btnDuplicate">前行複製</button>
+              <button class="btn" id="btnSaveClear">保存する</button>
+              <button class="btn secondary" id="btnAddNext">追加する（層番+1）</button>
               <button class="btn secondary" id="btnReset">リセット</button>
             </div>
 
@@ -388,7 +388,7 @@
     masterView:$("masterView"),
     btnCsv:$("btnCsv"), btnJson:$("btnJson"),
     btnSaveLocal:$("btnSaveLocal"), btnLoadLocal:$("btnLoadLocal"), btnClearLocal:$("btnClearLocal"),
-    btnAddImp:$("btnAddImp"), btnSave:$("btnSave"), btnDuplicate:$("btnDuplicate"), btnReset:$("btnReset"),
+    btnAddImp:$("btnAddImp"), btnSaveClear:$("btnSaveClear"), btnAddNext:$("btnAddNext"), btnReset:$("btnReset"),
     fabNew:$("fabNew"),
   };
 
@@ -428,7 +428,8 @@
   }
   function renderEditMode(){
     els.editMode.textContent = editingId ? `編集モード（id: ${editingId}）` : "新規入力";
-    els.btnSave.textContent = editingId ? "更新する" : "追加する";
+    els.btnSaveClear.textContent = editingId ? "保存する（更新してクリア）" : "保存する";
+    els.btnAddNext.textContent = editingId ? "追加する（更新して層番+1）" : "追加する（層番+1）";
   }
 
   function renderImpurities(){
@@ -609,37 +610,43 @@
 
   els.btnReset.addEventListener("click", ()=>{ resetForm(); renderAll(); });
 
-  els.btnDuplicate.addEventListener("click", ()=>{
-    const copy = JSON.parse(JSON.stringify(form));
-    copy.id = makeId();
-    copy.impurities = (copy.impurities||[]).map(it=>({...it, id:makeId()}));
-    rows = [copy, ...rows];
-    renderAll();
-  });
-
-  els.btnSave.addEventListener("click", ()=>{
+    // 保存する：保存したら入力内容をクリア（初期版の挙動）
+  els.btnSaveClear.addEventListener("click", ()=>{
     syncUIToForm();
     if(!form.isigou || !form.isigouNo || !form.souban){
       alert("遺構・番号(2桁)・層番は必須です。");
       return;
     }
 
-    // 保存（追加 or 更新）
     if(editingId){
       rows = rows.map(r=> r.id===editingId ? JSON.parse(JSON.stringify(form)) : r);
-      // 編集時はそのまま編集継続
-      renderAll();
-      return;
     }else{
       rows = [JSON.parse(JSON.stringify(form)), ...rows];
     }
 
-    // 「追加する」押下後、内容を残したまま層番だけ1つ進めて次の入力に入る
+    // クリアして新規入力へ
+    resetForm();
+    renderAll();
+  });
+
+  // 追加する（層番+1）：内容を残して層番だけ進める
+  els.btnAddNext.addEventListener("click", ()=>{
+    syncUIToForm();
+    if(!form.isigou || !form.isigouNo || !form.souban){
+      alert("遺構・番号(2桁)・層番は必須です。");
+      return;
+    }
+
+    if(editingId){
+      rows = rows.map(r=> r.id===editingId ? JSON.parse(JSON.stringify(form)) : r);
+    }else{
+      rows = [JSON.parse(JSON.stringify(form)), ...rows];
+    }
+
     const next = JSON.parse(JSON.stringify(form));
     next.id = makeId();
     next.impurities = (next.impurities||[]).map(it=>({ ...it, id: makeId() }));
 
-    // 層番が数値(1-100)なら +1
     const n = parseInt(next.souban, 10);
     if(String(n) === String(next.souban).trim() && Number.isFinite(n) && n < 100){
       next.souban = String(n + 1);
@@ -650,6 +657,7 @@
     syncFormToUI();
     renderAll();
   });
+
 
   els.btnCsv.addEventListener("click", ()=>download("doso-ledger-data.csv", rowsToCsv(rows), "text/csv;charset=utf-8"));
   els.btnJson.addEventListener("click", ()=>download("doso-ledger-data.json", JSON.stringify(rows,null,2), "application/json;charset=utf-8"));
