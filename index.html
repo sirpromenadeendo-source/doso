@@ -361,7 +361,8 @@
       const vals=[ featureCode(r), r.isigou, r.isigouNo, r.spl, r.souban, soilColorName(r), (r.colorName||soilColorName(r)), colorCode(r), r.hue, r.value, r.choroma, r.doshu, r.shimari, r.nensei, impuritiesSentence(r.impurities||[]), buildDesc(r), r.seikaku, r.bikou ].map(escCsv);
       lines.push(vals.join(","));
     });
-    return lines.join("\n");
+    return lines.join("
+");
   }
   function download(filename, content, mime){
     const blob=new Blob([content],{type:mime});
@@ -659,7 +660,11 @@
   });
 
 
-  els.btnCsv.addEventListener("click", ()=>download("doso-ledger-data.csv", rowsToCsv(rows), "text/csv;charset=utf-8"));
+  els.btnCsv.addEventListener("click", ()=>{
+    const csv = rowsToCsv(rows);
+    // Excel(特にWindows日本語環境)で文字化けしにくいようにUTF-8 BOMを付与
+    download("doso-ledger-data.csv", "\ufeff" + csv, "text/csv;charset=utf-8");
+  });
   els.btnJson.addEventListener("click", ()=>download("doso-ledger-data.json", JSON.stringify(rows,null,2), "application/json;charset=utf-8"));
 
   els.btnSaveLocal.addEventListener("click", ()=>{
