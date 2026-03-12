@@ -623,12 +623,32 @@
       alert("遺構・番号(2桁)・層番は必須です。");
       return;
     }
+
+    // 保存（追加 or 更新）
     if(editingId){
       rows = rows.map(r=> r.id===editingId ? JSON.parse(JSON.stringify(form)) : r);
+      // 編集時はそのまま編集継続
+      renderAll();
+      return;
     }else{
       rows = [JSON.parse(JSON.stringify(form)), ...rows];
     }
-    resetForm(); renderAll();
+
+    // 「追加する」押下後、内容を残したまま層番だけ1つ進めて次の入力に入る
+    const next = JSON.parse(JSON.stringify(form));
+    next.id = makeId();
+    next.impurities = (next.impurities||[]).map(it=>({ ...it, id: makeId() }));
+
+    // 層番が数値(1-100)なら +1
+    const n = parseInt(next.souban, 10);
+    if(String(n) === String(next.souban).trim() && Number.isFinite(n) && n < 100){
+      next.souban = String(n + 1);
+    }
+
+    editingId = null;
+    form = next;
+    syncFormToUI();
+    renderAll();
   });
 
   els.btnCsv.addEventListener("click", ()=>download("doso-ledger-data.csv", rowsToCsv(rows), "text/csv;charset=utf-8"));
